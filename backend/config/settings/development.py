@@ -18,7 +18,7 @@ INTERNAL_IPS = [
 ]
 
 # Email backend для разработки (выводит в консоль)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # Дополнительные настройки для разработки
 CORS_ALLOW_ALL_ORIGINS = True

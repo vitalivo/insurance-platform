@@ -3,6 +3,28 @@ import os
 from pathlib import Path
 from decouple import config as env_config
 
+import ssl
+from django.core.mail.backends.smtp import EmailBackend
+
+class CustomSMTPBackend(EmailBackend):
+    def open(self):
+        if self.connection:
+            return False
+        try:
+            self.connection = self.connection_class(
+                host=self.host, port=self.port, timeout=self.timeout
+            )
+            if self.use_tls:
+                context = ssl.create_default_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+                self.connection.starttls(context=context)
+            if self.username and self.password:
+                self.connection.login(self.username, self.password)
+            return True
+        except Exception:
+            if not self.fail_silently:
+                raise
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -38,8 +60,7 @@ LOCAL_APPS = [
     'products',
     'applications',
     'notifications',
-    'admin_panel',
-    'main',
+
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -141,10 +162,18 @@ REST_FRAMEWORK = {
 # JWT Settings
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=env_config('JWT_ACCESS_TOKEN_LIFETIME', default=60, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=env_config('JWT_REFRESH_TOKEN_LIFETIME', default=1440, cast=int)),
-    'ROTATE_REFRESH_TOKENS': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
 # CORS Settings
@@ -157,8 +186,7 @@ CORS_ALLOWED_ORIGINS = [
 # CELERY_BROKER_URL = env_config('REDIS_URL', default='redis://localhost:6379/0')
 # CELERY_RESULT_BACKEND = env_config('REDIS_URL', default='redis://localhost:6379/0')
 
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # Spectacular Settings (API Documentation)
 SPECTACULAR_SETTINGS = {
@@ -183,3 +211,18 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+# backend/insurance/settings.py
+
+# Добавим настройки для отправки email
+# Замените EMAIL_BACKEND на:
+EMAIL_BACKEND = 'config.settings.CustomSMTPBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'vitalivo@gmail.com'
+EMAIL_HOST_PASSWORD = 'avsx tsjl brds cmlf'
+DEFAULT_FROM_EMAIL = 'vitalivo@gmail.com'
+ADMIN_EMAIL = 'vitalivo@gmail.com'
