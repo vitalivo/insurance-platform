@@ -1,0 +1,36 @@
+
+[
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "name": "osago",
+      "display_name": "ОСАГО",
+      "description": "Обязательное страхование автогражданской ответственности владельцев транспортных средств",
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+      "name": "kasko",
+      "display_name": "КАСКО",
+      "description": "Добровольное страхование автотранспорта от угона и ущерба",
+      "order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 3,
+    "fields": {
+      "name": "ns",
+      "display_name": "Несчастный случай",
+      "description": "Страхование от несчастных случаев и болезней",
+      "order": 3,
+      "is_active": true
+    }
+  }
+]

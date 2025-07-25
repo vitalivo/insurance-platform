@@ -1,0 +1,39 @@
+
+[
+  {
+    "model": "applications.applicationstatus",
+    "pk": 1,
+    "fields": {
+      "name": "Новая",
+      "description": "Заявка только поступила в систему",
+      "color": "#3B82F6",
+      "is_final": false,
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "applications.applicationstatus",
+    "pk": 2,
+    "fields": {
+      "name": "В обработке",
+      "description": "Заявка находится в процессе обработки",
+      "color": "#F59E0B",
+      "is_final": false,
+      "order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "applications.applicationstatus",
+    "pk": 3,
+    "fields": {
+      "name": "Одобрена",
+      "description": "Заявка одобрена и готова к оформлению",
+      "color": "#10B981",
+      "is_final": true,
+      "order": 3,
+      "is_active": true
+    }
+  }
+]

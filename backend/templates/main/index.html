@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang='ru'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>{{ title }}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .success { color: #4ade80; font-size: 18px; }
+        .title { font-size: 2.5em; margin-bottom: 20px; text-align: center; }
+        .subtitle { text-align: center; margin-bottom: 30px; opacity: 0.9; }
+        a { color: #60a5fa; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .status-item { margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1 class='title'>🏢 {{ title }}</h1>
+        <p class='subtitle'>{{ message }}</p>
+        
+        <div class='success'>
+            <div class='status-item'>✅ Django 4.2.23 настроен правильно</div>
+            <div class='status-item'>✅ База данных подключена</div>
+            <div class='status-item'>✅ Модели созданы</div>
+            <div class='status-item'>✅ Структура приложений готова</div>
+            <div class='status-item'>🚀 Готов к разработке VIP проекта</div>
+        </div>
+        
+        <hr style='margin: 30px 0; border: 1px solid rgba(255,255,255,0.3);'>
+        
+        <div style='text-align: center;'>
+            <p><a href='/admin/' style='font-size: 18px;'>🔧 Перейти в админку Django</a></p>
+            <p><a href='/about/' style='font-size: 16px;'>ℹ️ О компании</a></p>
+            <p><a href='/contacts/' style='font-size: 16px;'>📞 Контакты</a></p>
+        </div>
+    </div>
+</body>
+</html>
