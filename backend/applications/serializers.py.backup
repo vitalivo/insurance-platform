@@ -1,3 +1,4 @@
+
 from rest_framework import serializers
 from .models import Application, ApplicationStatus
 from products.serializers import ProductListSerializer
@@ -11,10 +12,10 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = [
-            'product', 'full_name', 'phone', 'email',
+            'product', 'full_name', 'phone', 'email', 
             'birth_date', 'additional_data', 'personal_data_consent', 'comment'
         ]
-
+    
     def create(self, validated_data):
         # Автоматически устанавливаем статус "Новая"
         try:
