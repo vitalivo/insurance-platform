@@ -14,25 +14,20 @@ class ProductListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 class ProductDetailView(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductDetailSerializer
-    lookup_field = 'slug'
+    """Получение детальной информации о продукте"""
+    queryset = Product.objects.filter(is_active=True)
+    serializer_class = ProductSerializer
+    lookup_field = 'name'  # ✅ Используем 'name' вместо 'slug'
     permission_classes = [AllowAny]
     
     def get_object(self):
-        slug = self.kwargs.get('slug')
+        """Кешируем детальную информацию о продукте"""
+        name = self.kwargs.get('name')
+        cache_key = f'product_detail_{name}'
         
-        # Проверяем кеш
-        cache_key = f'product_detail_{slug}'
         cached_product = cache.get(cache_key)
-        
-        if cached_product:
-            return cached_product
-            
-        # Если нет в кеше, получаем из БД
-        product = super().get_object()
-        
-        # Кешируем на 30 минут
-        cache.set(cache_key, product, 60 * 30)
-        
-        return product
+        if not cached_product:
+            product = super().get_object()
+            cache.set(cache_key, product, 60 * 15)  # 15 минут
+            return product
+        return cached_product

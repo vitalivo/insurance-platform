@@ -229,12 +229,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# Celery Configuration (отключаем пока Redis не настроен)
-# CELERY_BROKER_URL = env_config('REDIS_URL', default='redis://localhost:6379/0')
-# CELERY_RESULT_BACKEND = env_config('REDIS_URL', default='redis://localhost:6379/0')
-
-
-
 # Spectacular Settings (API Documentation)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Insurance Platform API',
@@ -280,3 +274,17 @@ ADMIN_EMAIL = os.getenv('EMAIL_HOST_USER', '')
 # Telegram Bot settings
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
+
+# В файле backend/config/settings.py добавьте в конец:
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/2'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_ENABLE_UTC = True
+
+# Celery Beat (периодические задачи)
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

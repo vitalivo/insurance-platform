@@ -1,107 +1,92 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from .models import Application
-from .serializers import ApplicationCreateSerializer, ApplicationSerializer
-from .utils import send_application_notification, send_telegram_notification
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
-
 from django.core.cache import cache
 
-# В ApplicationCreateView добавим кеширование статусов
-def get_default_status(self):
-    # Кешируем статус "Новая" на 1 час
-    cache_key = 'default_status'
-    default_status = cache.get(cache_key)
-    
-    if not default_status:
-        from .models import ApplicationStatus
-        default_status = ApplicationStatus.objects.get(name='Новая')
-        cache.set(cache_key, default_status, 60 * 60)
-    
-    return default_status
+from .models import Application
+from .serializers import ApplicationCreateSerializer, ApplicationSerializer
+from notifications.tasks import send_application_notification  # ✅ Только Celery задачи
 
 class AdminApplicationListView(ListAPIView):
     """API для получения списка всех заявок (только для админов)"""
     queryset = Application.objects.all().order_by('-created_at')
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # ✅ JWT защищено
-    
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get_queryset(self):
         queryset = super().get_queryset()
         
-        # Фильтрация по статусу (если указан)
-        status = self.request.query_params.get('status')
-        if status:
-            queryset = queryset.filter(status__name=status)
-            
-        # Фильтрация по продукту (если указан)
+        # Фильтрация по статусу
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status__name=status_param)
+        
+        # Фильтрация по продукту
         product = self.request.query_params.get('product')
         if product:
             queryset = queryset.filter(product__id=product)
-            
+        
         return queryset
 
 class AdminApplicationUpdateView(RetrieveUpdateAPIView):
     """API для обновления статуса заявки (только для админов)"""
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # ✅ JWT защищено
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
 class ApplicationCreateView(generics.CreateAPIView):
     """Создание заявки - доступно всем"""
     queryset = Application.objects.all()
     serializer_class = ApplicationCreateSerializer
-    permission_classes = [AllowAny]  # ✅ Остается открытым для клиентов
-    
+    permission_classes = [AllowAny]
+
+    def get_default_status(self):
+        """Кешируем статус 'Новая' на 1 час"""
+        cache_key = 'default_status'
+        default_status = cache.get(cache_key)
+        
+        if not default_status:
+            from .models import ApplicationStatus
+            default_status = ApplicationStatus.objects.get(name='Новая')
+            cache.set(cache_key, default_status, 60 * 60)
+        
+        return default_status
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        application = serializer.save()
         
-        # Добавляем IP адрес и User Agent
-        validated_data = serializer.validated_data
-        validated_data['user_ip'] = self.get_client_ip(request)
-        validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
+        # Подготавливаем данные для асинхронного уведомления
+        notification_data = {
+            'id': application.id,
+            'product_name': application.product.display_name,
+            'client_name': application.client_name,
+            'client_email': application.client_email,
+            'client_phone': application.client_phone,
+            'created_at': application.created_at.strftime('%d.%m.%Y %H:%M'),
+            'application_number': application.application_number,
+            'client_ip': self.get_client_ip(request),
+        }
         
-        application = serializer.save(**validated_data)
+        # ✅ Отправляем уведомление через Celery (асинхронно)
+        send_application_notification.delay(notification_data)
         
-        # Отправляем уведомления
-        self.perform_create_notifications(application)
-        
-        response_serializer = ApplicationSerializer(application)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)  # ✅ Исправлено
+
     def get_client_ip(self, request):
+        """Получаем IP адрес клиента"""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
             ip = x_forwarded_for.split(',')[0]
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
-    
-    def perform_create_notifications(self, application):
-        """Отправляет все уведомления о новой заявке"""
-        
-        # 📧 Отправляем email уведомления
-        try:
-            send_application_notification(application)
-            print(f"✅ Email уведомления отправлены для заявки #{application.application_number}")
-        except Exception as e:
-            print(f"❌ Ошибка отправки email: {e}")
-        
-        # 📱 Отправляем Telegram уведомление
-        try:
-            send_telegram_notification(application)
-            print(f"✅ Telegram уведомление отправлено для заявки #{application.application_number}")
-        except Exception as e:
-            print(f"❌ Ошибка отправки Telegram: {e}")
-        
-        return application
 
 class ApplicationDetailView(generics.RetrieveAPIView):
     """Просмотр заявки по номеру - доступно всем"""
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [AllowAny]  # ✅ Остается открытым для отслеживания
+    permission_classes = [AllowAny]
     lookup_field = 'application_number'
