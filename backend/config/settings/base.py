@@ -126,23 +126,34 @@ else:
 
 # Redis Cache
 # Временно отключаем Redis до его настройки
-if os.getenv('USE_REDIS', 'False').lower() == 'true':
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/0'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            }
+# if os.getenv('USE_REDIS', 'False').lower() == 'true':
+#     CACHES = {
+#         'default': {
+#             'BACKEND': 'django_redis.cache.RedisCache',
+#             'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/0'),
+#             'OPTIONS': {
+#                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             }
+#         }
+#     }
+# else:
+#     # Локальный кеш
+#     CACHES = {
+#         'default': {
+#             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#         }
+#     }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
-else:
-    # Локальный кеш
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        }
-    }
+}
+CACHE_TTL = 60 * 15  # 15 минут
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

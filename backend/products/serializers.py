@@ -18,3 +18,15 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'display_name', 'description']
+        
+# Добавьте в конец файла:
+class ProductDetailSerializer(ProductSerializer):
+    fields = serializers.SerializerMethodField()
+    
+    class Meta(ProductSerializer.Meta):
+        fields = ProductSerializer.Meta.fields + ['fields']
+    
+    def get_fields(self, obj):
+        from .models import ProductField
+        fields = ProductField.objects.filter(product=obj)
+        return [{'name': f.name, 'field_type': f.field_type, 'required': f.required} for f in fields]        

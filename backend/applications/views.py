@@ -7,6 +7,21 @@ from .utils import send_application_notification, send_telegram_notification
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
 
+from django.core.cache import cache
+
+# В ApplicationCreateView добавим кеширование статусов
+def get_default_status(self):
+    # Кешируем статус "Новая" на 1 час
+    cache_key = 'default_status'
+    default_status = cache.get(cache_key)
+    
+    if not default_status:
+        from .models import ApplicationStatus
+        default_status = ApplicationStatus.objects.get(name='Новая')
+        cache.set(cache_key, default_status, 60 * 60)
+    
+    return default_status
+
 class AdminApplicationListView(ListAPIView):
     """API для получения списка всех заявок (только для админов)"""
     queryset = Application.objects.all().order_by('-created_at')
