@@ -124,13 +124,12 @@ else:
         }
     }
 
-# Redis Cache
-# Временно отключаем Redis до его настройки
+# Redis Cache - ИСПРАВЛЕНО для Docker
 # if os.getenv('USE_REDIS', 'False').lower() == 'true':
 #     CACHES = {
 #         'default': {
 #             'BACKEND': 'django_redis.cache.RedisCache',
-#             'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/0'),
+#             'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),  # ✅ Используем переменную окружения
 #             'OPTIONS': {
 #                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
 #             }
@@ -144,15 +143,14 @@ else:
 #         }
 #     }
 
+# В backend/config/settings.py замените секцию CACHES на:
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',  # ✅ Временно отключаем Redis
     }
 }
+
+
 CACHE_TTL = 60 * 15  # 15 минут
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -277,9 +275,9 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 
 # В файле backend/config/settings.py добавьте в конец:
 
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/2'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
+# Celery Configuration - ИСПРАВЛЕНО для Docker
+# CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
+# CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
