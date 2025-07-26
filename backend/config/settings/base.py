@@ -19,6 +19,7 @@ class CustomSMTPBackend(EmailBackend):
                 host=self.host, port=self.port, timeout=self.timeout
             )
             if self.use_tls:
+                # Создаем SSL контекст с отключенной проверкой сертификатов
                 context = ssl.create_default_context()
                 context.check_hostname = False
                 context.verify_mode = ssl.CERT_NONE
@@ -26,7 +27,8 @@ class CustomSMTPBackend(EmailBackend):
             if self.username and self.password:
                 self.connection.login(self.username, self.password)
             return True
-        except Exception:
+        except Exception as e:
+            print(f"Email connection error: {e}")
             if not self.fail_silently:
                 raise
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -276,8 +278,8 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 # В файле backend/config/settings.py добавьте в конец:
 
 # Celery Configuration - ИСПРАВЛЕНО для Docker
-# CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
-# CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/2')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

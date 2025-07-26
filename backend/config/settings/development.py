@@ -25,3 +25,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Логирование в консоль для разработки
 LOGGING['handlers']['console']['level'] = 'DEBUG'
+
+# SSL настройки для email (отключаем проверку сертификатов)
+import ssl
+EMAIL_SSL_CONTEXT = ssl.create_default_context()
+EMAIL_SSL_CONTEXT.check_hostname = False
+EMAIL_SSL_CONTEXT.verify_mode = ssl.CERT_NONE
+
+# Переопределяем настройки из base.py для разработки
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False

@@ -2,6 +2,11 @@ import os
 from celery import Celery
 from django.conf import settings
 
+# Загружаем .env файл
+from dotenv import load_dotenv
+load_dotenv()
+
+
 # Устанавливаем переменную окружения для Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
@@ -16,8 +21,8 @@ app.autodiscover_tasks()
 
 # Конфигурация Celery
 app.conf.update(
-    broker_url='redis://localhost:6379/2',  # База 2 для Celery
-    result_backend='redis://localhost:6379/2',
+    broker_url='redis://localhost:6379',  # База 2 для Celery
+    result_backend=os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/2'),
     task_serializer='json',
     accept_content=['json'],
     result_serializer='json',
