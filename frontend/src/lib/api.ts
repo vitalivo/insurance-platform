@@ -50,3 +50,4 @@ export const applicationsAPI = {
   create: (data: ApplicationData) => apiClient.post('/applications/create/', data),
   getByNumber: (number: string) => apiClient.get(`/applications/${number}/`),
 };
+
