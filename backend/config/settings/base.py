@@ -226,3 +226,7 @@ EMAIL_HOST_USER = 'vitalivo@gmail.com'
 EMAIL_HOST_PASSWORD = 'avsx tsjl brds cmlf'
 DEFAULT_FROM_EMAIL = 'vitalivo@gmail.com'
 ADMIN_EMAIL = 'vitalivo@gmail.com'
+
+# Telegram Bot настройки
+TELEGRAM_BOT_TOKEN = '8225846461:AAHPo3js2OMhaUGXDXvYnvQFoIOn3H_c45U'
+TELEGRAM_CHAT_ID = '769259836'  # ← Ваш chat_id (БЕЗ кавычек, если число)

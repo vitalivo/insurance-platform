@@ -1,11 +1,9 @@
-
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Application
 from .serializers import ApplicationCreateSerializer, ApplicationSerializer
-from .utils import send_application_notification, send_sms_notification
-
+from .utils import send_application_notification, send_telegram_notification
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
 
@@ -36,7 +34,6 @@ class AdminApplicationUpdateView(RetrieveUpdateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-
 class ApplicationCreateView(generics.CreateAPIView):
     queryset = Application.objects.all()
     serializer_class = ApplicationCreateSerializer
@@ -52,7 +49,10 @@ class ApplicationCreateView(generics.CreateAPIView):
         validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
         
         application = serializer.save(**validated_data)
+        
+        # Отправляем уведомления
         self.perform_create_notifications(application)
+        
         response_serializer = ApplicationSerializer(application)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     
@@ -65,19 +65,21 @@ class ApplicationCreateView(generics.CreateAPIView):
         return ip
     
     def perform_create_notifications(self, application):
-    # Отправляем email уведомление
+        """Отправляет все уведомления о новой заявке"""
+        
+        # 📧 Отправляем email уведомления
         try:
             send_application_notification(application)
             print(f"✅ Email уведомления отправлены для заявки #{application.application_number}")
         except Exception as e:
             print(f"❌ Ошибка отправки email: {e}")
         
-    # Отправляем SMS уведомление
+        # 📱 Отправляем Telegram уведомление
         try:
-            send_sms_notification(application)
-            print(f"✅ SMS уведомление отправлено для заявки #{application.application_number}")
+            send_telegram_notification(application)
+            print(f"✅ Telegram уведомление отправлено для заявки #{application.application_number}")
         except Exception as e:
-            print(f"❌ Ошибка отправки SMS: {e}")
+            print(f"❌ Ошибка отправки Telegram: {e}")
         
         return application
 

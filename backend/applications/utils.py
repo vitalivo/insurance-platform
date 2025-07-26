@@ -4,6 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import ssl
+import requests
 
 def send_application_notification(application):
     """Отправляет email уведомления о новой заявке"""
@@ -77,9 +78,88 @@ http://localhost:3000/tracking?number={application.application_number}
         print(f"❌ Ошибка отправки email: {e}")
         raise e
 
+def send_telegram_notification(application):
+    """Отправляет уведомление через Telegram Bot"""
+    
+    message_text = f"""🔔 *Новая заявка получена!*
+
+📋 *Номер заявки:* `{application.application_number}`
+👤 *Клиент:* {application.full_name}
+📞 *Телефон:* {application.phone}
+📧 *Email:* {application.email}
+🏢 *Продукт:* {application.product.name}
+📅 *Дата:* {application.created_at.strftime('%d.%m.%Y %H:%M')}
+📊 *Статус:* {application.status.name}
+
+🔗 [Отследить заявку](http://localhost:3000/tracking?number={application.application_number})"""
+    
+    try:
+        print(f"📱 Отправляем Telegram уведомление")
+        
+        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        
+        params = {
+            'chat_id': settings.TELEGRAM_CHAT_ID,
+            'text': message_text,
+            'parse_mode': 'Markdown',
+            'disable_web_page_preview': True
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        result = response.json()
+        
+        print(f"📊 Ответ Telegram API: {result}")
+        
+        if result.get('ok'):
+            print(f"✅ Telegram уведомление отправлено успешно!")
+            return True
+        else:
+            print(f"❌ Ошибка Telegram: {result}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Ошибка отправки Telegram: {e}")
+        return False
+
+def test_telegram():
+    """Тестовая отправка в Telegram"""
+    
+    message_text = """🧪 *ТЕСТ уведомлений*
+
+Это тестовое сообщение от страховой системы!
+
+Если получили - все работает! 🚀
+
+_Система уведомлений активна_"""
+    
+    try:
+        print(f"🧪 ТЕСТ: Отправляем Telegram сообщение")
+        
+        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        
+        params = {
+            'chat_id': settings.TELEGRAM_CHAT_ID,
+            'text': message_text,
+            'parse_mode': 'Markdown'
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        result = response.json()
+        
+        print(f"📊 Результат теста: {result}")
+        
+        if result.get('ok'):
+            print("✅ ТЕСТ УСПЕШЕН! Telegram работает!")
+            return True
+        else:
+            print(f"❌ ТЕСТ НЕУДАЧЕН: {result}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Ошибка теста: {e}")
+        return False
+
+# Оставляем старую функцию для совместимости
 def send_sms_notification(application):
-    """Отправляет SMS уведомление клиенту"""
-    
-    message = f"Ваша заявка #{application.application_number} получена. Отслеживание: http://localhost:3000/tracking?number={application.application_number}"
-    
-    print(f"📱 SMS отправлено на {application.phone}: {message}")
+    """Отправляет уведомление через Telegram (замена SMS)"""
+    return send_telegram_notification(application)
