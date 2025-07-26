@@ -11,7 +11,7 @@ class AdminApplicationListView(ListAPIView):
     """API для получения списка всех заявок (только для админов)"""
     queryset = Application.objects.all().order_by('-created_at')
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminUser]  # ✅ JWT защищено
     
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -32,12 +32,13 @@ class AdminApplicationUpdateView(RetrieveUpdateAPIView):
     """API для обновления статуса заявки (только для админов)"""
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminUser]  # ✅ JWT защищено
 
 class ApplicationCreateView(generics.CreateAPIView):
+    """Создание заявки - доступно всем"""
     queryset = Application.objects.all()
     serializer_class = ApplicationCreateSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # ✅ Остается открытым для клиентов
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -84,7 +85,8 @@ class ApplicationCreateView(generics.CreateAPIView):
         return application
 
 class ApplicationDetailView(generics.RetrieveAPIView):
+    """Просмотр заявки по номеру - доступно всем"""
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # ✅ Остается открытым для отслеживания
     lookup_field = 'application_number'
