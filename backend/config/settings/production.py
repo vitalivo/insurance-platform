@@ -10,7 +10,9 @@ ALLOWED_HOSTS = ['*']  # Временно, потом укажем конкре�
 
 # База данных из переменной окружения (Render предоставит PostgreSQL)
 DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3')
+    )
 }
 
 # Статичные файлы
@@ -31,3 +33,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 # Redis для Celery (Render предоставит Redis)
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
