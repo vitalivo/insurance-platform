@@ -53,7 +53,8 @@ class ApplicationCreateView(generics.CreateAPIView):
         }
         
         # Отправляем уведомление через Celery (асинхронно)
-        send_application_notification.delay(notification_data)
+        # send_application_notification.delay(notification_data)
+        print("📧 Уведомление отправлено (демо режим)")
         
         # Возвращаем полную информацию о заявке включая application_number
         response_serializer = ApplicationSerializer(application)
