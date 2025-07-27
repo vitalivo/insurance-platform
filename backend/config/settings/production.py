@@ -36,3 +36,10 @@ CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+
+
+CORS_ALLOWED_ORIGINS = [
+    "https://insurance-platform-frontend.onrender.com",  # URL фронтенда
+]
+
+CORS_ALLOW_ALL_ORIGINS = True  # Временно для тестирования
