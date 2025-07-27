@@ -4,13 +4,6 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true
-  },
-  // Исключить динамические маршруты из экспорта
-  exportPathMap: async function () {
-    return {
-      '/': { page: '/' },
-      '/track': { page: '/track' },
-    }
   }
 }
 
