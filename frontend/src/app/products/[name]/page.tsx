@@ -5,6 +5,17 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { productsAPI, applicationsAPI, Product, ApplicationData } from '@/lib/api';
 
+export async function generateStaticParams() {
+  return [
+    { name: 'osago' },
+    { name: 'kasko' },
+    { name: 'ifl' },
+    { name: 'ns' },
+    { name: 'mortgage' },
+    { name: 'klezh' },
+  ]
+}
+
 export default function ProductPage() {
   const params = useParams();
   const productName = params.name as string;
