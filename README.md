@@ -9,6 +9,9 @@
 - **URL:** http://localhost:3000
 - **Технологии:** Next.js 14, React, TypeScript, Tailwind CSS
 
+
+
+
 ### Админ панель (Управление)
 - **URL:** http://127.0.0.1:8000/admin/
 - **Логин:** admin
